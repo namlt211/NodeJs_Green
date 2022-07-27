@@ -20,6 +20,12 @@ export const addManufacture = async (req, res) => {
         createBy: userId,
         status: status,
       };
+      if(status === ""){
+        return res.status(200).json({
+          success: false,
+          message: "Bạn chưa chọn trạng thái",
+        });
+      }
       const newManufacture = Manufacture(result);
       await newManufacture.save();
       res.status(200).json({
