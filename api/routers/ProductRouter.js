@@ -54,7 +54,7 @@ router.get("/search-category/:searchKey", findCategoryByName);
 
 //products
 router.post("/add-product", verifyTokenAdmin, addProduct);
-router.get("/get-all-product", getAllProduct);
+router.get("/get-all-product/:page", getAllProduct);
 router.get("/get-product-by-category/:id", getProductByCategory);
 router.get("/delete-product-by-id/:id", verifyTokenAdmin, deleteProductById);
 router.get("/search-product/:searchKey", findProductByName);

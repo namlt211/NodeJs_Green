@@ -1,3 +1,4 @@
+import { parse } from "path";
 import { Product } from "../models/Product.js";
 import { createBy } from "./verifyToken.js";
 export const addProduct = async (req, res) => {
@@ -75,6 +76,15 @@ export const addProduct = async (req, res) => {
 };
 
 export const getAllProduct = async (req, res) => {
+  let page = parseInt(req.params.page);
+  if (!page) {
+    page = 1;
+  }
+  let limit = parseInt(req.params.limit);
+  if (!limit) {
+    limit = 10;
+  }
+  let skip = limit * (page - 1);
   try {
     const products = await Product.find({ isDelete: false })
       .select(
@@ -86,13 +96,18 @@ export const getAllProduct = async (req, res) => {
         path: "createBy",
         select: "_id",
         populate: { path: "role", select: "name" },
-      });
+      })
+      .sort("createdAt DESC")
+      .skip(skip)
+      .limit(limit);
     const total = await Product.find({ isDelete: false }).count();
+    const totalItem = (page - 1) * limit + products.length;
     res.status(200).json({
       success: true,
-      message: "get all product success",
+      message: "Lay thong tin thanh cong",
       data: products,
       total: total,
+      totalItem: totalItem,
     });
   } catch (err) {
     res.status(500).json({
@@ -104,6 +119,15 @@ export const getAllProduct = async (req, res) => {
 };
 
 export const getProductByCategory = async (req, res) => {
+  let page = parseInt(req.query.page);
+  if (!page) {
+    page = 1;
+  }
+  let limit = parseInt(req.query.limit);
+  if (!limit) {
+    limit = 10;
+  }
+  let skip = limit * (page - 1);
   try {
     const categoryId = req.params.id;
     const data = await Product.find({
@@ -118,11 +142,18 @@ export const getProductByCategory = async (req, res) => {
         path: "createBy",
         select: "_id",
         populate: { path: "role", select: "name" },
-      });
+      })
+      .sort("createdAt DESC")
+      .skip(skip)
+      .limit(limit);
+    const total = await Product.find({
+      $and: [{ isDelete: false }, { category: categoryId }],
+    }).count();
     res.status(200).json({
       success: true,
       message: "get product by category success",
       data: data,
+      total: total,
     });
   } catch (err) {
     res.status(500).json({
